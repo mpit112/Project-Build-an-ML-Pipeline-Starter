@@ -4,6 +4,7 @@ This step takes the best model, tagged with the "prod" tag, and tests it against
 """
 import argparse
 import logging
+import os
 import wandb
 import mlflow
 import pandas as pd
@@ -22,12 +23,13 @@ def go(args):
     run.config.update(args)
 
     logger.info("Downloading artifacts")
-    # Download input artifact. This will also log that this script is using this
-    # particular version of the artifact
     model_local_path = run.use_artifact(args.mlflow_model).download()
 
-    # Download test dataset
-    test_dataset_path = run.use_artifact(args.test_dataset).file()
+    # Fix for Windows - replace .file() with .download()
+    artifact = run.use_artifact(args.test_dataset)
+    artifact_dir = artifact.download()
+    files = [f for f in os.listdir(artifact_dir) if f.endswith('.csv')]
+    test_dataset_path = os.path.join(artifact_dir, files[0])
 
     # Read test dataset
     X_test = pd.read_csv(test_dataset_path)
@@ -39,7 +41,6 @@ def go(args):
 
     logger.info("Scoring")
     r_squared = sk_pipe.score(X_test, y_test)
-
     mae = mean_absolute_error(y_test, y_pred)
 
     logger.info(f"Score: {r_squared}")
@@ -52,22 +53,23 @@ def go(args):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Test the provided model against the test dataset")
+    parser = argparse.ArgumentParser(
+        description="Test the provided model against the test dataset"
+    )
 
     parser.add_argument(
         "--mlflow_model",
-        type=str, 
+        type=str,
         help="Input MLFlow model",
         required=True
     )
 
     parser.add_argument(
         "--test_dataset",
-        type=str, 
+        type=str,
         help="Test dataset",
         required=True
     )
 
     args = parser.parse_args()
-
     go(args)
