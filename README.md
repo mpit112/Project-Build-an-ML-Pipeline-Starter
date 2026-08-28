@@ -181,5 +181,5 @@ Please, make sure all steps are using **the same** python version and that you h
 [License](LICENSE.txt)
 
 ## Project Links
-- W&B Project: https://wandb.ai/mpit112/nyc_airbnb
-- GitHub Repo: https://github.com/mpit112/build-ml-pipeline-for-short-term-rental-prices
+- W&B: https://wandb.ai/mpit112-western-governors-university/nyc_airbnb
+- GitHub: https://github.com/mpit112/Project-Build-an-ML-Pipeline-Starter
